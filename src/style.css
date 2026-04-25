@@ -1,0 +1,21 @@
+:root {
+  font-family: system-ui, sans-serif;
+  --color-background: #FFFFFF;
+  --color-text: #283C83;
+  --color-accent: #65666A;
+}
+
+body {
+  margin: 0;
+  color: var(--color-text);
+  background: var(--color-background);
+}
+
+.app {
+  margin: 0 auto;
+  min-height: 100vh; /* for older browsers */
+  min-height: 100dvh; /* better for mobile */
+  display: grid;
+  place-items: center;
+  width: min(100% - 2rem, 720px);
+}
