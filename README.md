@@ -1,2 +1,3 @@
 # 2048
-Implementation of 2048 game
+
+Browser-based TypeScript implementation of the 2048 game for a coding assignment
