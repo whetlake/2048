@@ -1,6 +1,7 @@
 import { BOARD_SIZE } from "./constants"
-import { getEmptyPositions, spawnTile } from "./spawning"
-import type { Board, GameState } from "./types"
+import { moveBoard } from "./movement"
+import { getEmptyPositions, spawnRandomTile, spawnTile } from "./spawning"
+import type { Board, Direction, GameState } from "./types"
 
 export function createInitialState(random: () => number): GameState {
     let board = createEmptyBoard()
@@ -15,6 +16,17 @@ export function createInitialState(random: () => number): GameState {
         board,
         score: 0,
         status: 'playing',
+    }
+}
+
+export function playTurn(state: GameState, direction: Direction, random: () => number): GameState {
+    if (state.status !== 'playing') { return state }
+    const move = moveBoard(state.board, direction)
+    if (!move.changed) { return state }
+    return {
+        board: spawnRandomTile(move.board, random),
+        score: state.score + move.scoreDelta,
+        status: 'playing'
     }
 }
 
