@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { getEmptyPositions, positionToCoordinates, spawnTile, spawnRandomTile } from '../../src/game/spawning'
+import { fakeRandomSequence } from '../helpers/fakeRandomSequence'
 
 describe('getEmptyPositions', () => {
     test('returns zero-based positions for empty cells', () => {
@@ -116,13 +117,3 @@ describe('spawnRandomTile', () => {
     expect(spawnRandomTile(board, fakeRandomSequence([0, 0.5]))).toEqual(board)
   })
 })
-
-/*
-Helpers
-*/
-
-// Needed to fake spawnRandomTile
-function fakeRandomSequence(values: number[]): () => number {
-    let index = 0
-    return () => values[index++]
-}

@@ -6,3 +6,9 @@ export type MoveResult = {
     scoreDelta: number,
     changed: boolean // is required because the board can change without merge
 }
+export type GameStatus = 'playing' | 'won' | 'lost'
+export type GameState = {
+    board: Board
+    score: number
+    status: GameStatus
+}
