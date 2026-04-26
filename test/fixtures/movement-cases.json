@@ -1,0 +1,236 @@
+[
+    {
+        "name": "mc0001 - moves left",
+        "direction": "left",
+        "before": [
+            [null, 8, 2, 2],
+            [4, 2, null, 2],
+            [null, null, null, null],
+            [null, null, null, 2]
+        ],
+        "after": [
+            [8, 4, null, null],
+            [4, 4, null, null],
+            [null, null, null, null],
+            [2, null, null, null]
+        ],
+        "scoreDelta": 8,
+        "changed": true
+    },
+    {
+        "name": "mc0002 - moves right",
+        "direction": "right",
+        "before": [
+            [null, 8, 2, 2],
+            [4, 2, null, 2],
+            [null, null, null, null],
+            [null, null, null, 2]
+        ],
+        "after": [
+            [null, null, 8, 4],
+            [null, null, 4, 4],
+            [null, null, null, null],
+            [null, null, null, 2]
+        ],
+        "scoreDelta": 8,
+        "changed": true
+    },
+    {
+        "name": "mc0003 - moves up",
+        "direction": "up",
+        "before": [
+            [null, 8, 2, 2],
+            [4, 2, null, 2],
+            [null, null, null, null],
+            [null, null, null, 2]
+        ],
+        "after": [
+            [4, 8, 2, 4],
+            [null, 2, null, 2],
+            [null, null, null, null],
+            [null, null, null, null]
+        ],
+        "scoreDelta": 4,
+        "changed": true
+    },
+    {
+        "name": "mc0004 - moves down",
+        "direction": "down",
+        "before": [
+            [null, 8, 2, 2],
+            [4, 2, null, 2],
+            [null, null, null, null],
+            [null, null, null, 2]
+        ],
+        "after": [
+            [null, null, null, null],
+            [null, null, null, null],
+            [null, 8, null, 2],
+            [4, 2, 2, 4]
+        ],
+        "scoreDelta": 4,
+        "changed": true
+    },
+    {
+        "name": "mc0005 - merges each case tile only once",
+        "direction": "left",
+        "before": [
+            [2, 2, 2, 2],
+            [null, null, null, null],
+            [null, null, null, null],
+            [null, null, null, null]
+        ],
+        "after": [
+            [4, 4, null, null],
+            [null, null, null, null],
+            [null, null, null, null],
+            [null, null, null, null]
+        ],
+        "scoreDelta": 8,
+        "changed": true
+    },
+    {
+        "name": "mc0006 - unchanged move",
+        "direction": "left",
+        "before": [
+            [2, 4, null, null],
+            [null, null, null, null],
+            [8, null, null, null],
+            [null, null, null, null]
+        ],
+        "after": [
+            [2, 4, null, null],
+            [null, null, null, null],
+            [8, null, null, null],
+            [null, null, null, null]
+        ],
+        "scoreDelta": 0,
+        "changed": false
+    },
+    {
+        "name": "mc0007 - closes gaps before merging",
+        "direction": "left",
+        "before": [
+            [null, null, null, null],
+            [null, null, null, null],
+            [2, null, 2, 4],
+            [null, null, null, null]
+        ],
+        "after": [
+            [null, null, null, null],
+            [null, null, null, null],
+            [4, 4, null, null],
+            [null, null, null, null]
+        ],
+        "scoreDelta": 4,
+        "changed": true
+    },
+    {
+        "name": "mc0008 - merges first pair only",
+        "direction": "left",
+        "before": [
+            [null, null, null, null],
+            [null, null, null, null],
+            [null, null, null, null],
+            [4, 4, 4, null]
+        ],
+        "after": [
+            [null, null, null, null],
+            [null, null, null, null],
+            [null, null, null, null],
+            [8, 4, null, null]
+        ],
+        "scoreDelta": 8,
+        "changed": true
+    },
+    {
+        "name": "mc0009 - merges large tiles",
+        "direction": "left",
+        "before": [
+            [1024, 1024, null, null],
+            [null, null, null, null],
+            [null, null, null, null],
+            [null, null, null, null]
+        ],
+        "after": [
+            [2048, null, null, null],
+            [null, null, null, null],
+            [null, null, null, null],
+            [null, null, null, null]
+        ],
+        "scoreDelta": 2048,
+        "changed": true
+    },
+    {
+        "name": "mc0010 - does not merge different adjacent tiles",
+        "direction": "left",
+        "before": [
+            [null, null, null, null],
+            [2, 4, 8, 16],
+            [null, null, null, null],
+            [null, null, null, null]
+        ],
+        "after": [
+            [null, null, null, null],
+            [2, 4, 8, 16],
+            [null, null, null, null],
+            [null, null, null, null]
+        ],
+        "scoreDelta": 0,
+        "changed": false
+    },
+    {
+        "name": "mc0011 - complex example 1",
+        "direction": "down",
+        "before": [
+            [null, null, null, null],
+            [null, null, 2, 2],
+            [8, 4, 8, 2],
+            [null, 4, 8, 2]
+        ],
+        "after": [
+            [null, null, null, null],
+            [null, null, null, null],
+            [null, null, 2, 2],
+            [8, 8, 16, 4]
+        ],
+        "scoreDelta": 28,
+        "changed": true
+    },
+    {
+        "name": "mc0012 - complex example 2",
+        "direction": "up",
+        "before": [
+            [null, null, null, null],
+            [null, null, 2, 2],
+            [8, 4, 8, 2],
+            [null, 4, 8, 2]
+        ],
+        "after": [
+            [8, 8, 2, 4],
+            [null, null, 16, 2],
+            [null, null, null, null],
+            [null, null, null, null]
+        ],
+        "scoreDelta": 28,
+        "changed": true
+    },
+        {
+        "name": "mc0013 - complex example 3",
+        "direction": "left",
+        "before": [
+            [null, null, null, null],
+            [null, null, 2, 2],
+            [8, 4, 8, 2],
+            [null, 4, 8, 2]
+        ],
+        "after": [
+            [null, null, null, null],
+            [4, null, null, null],
+            [8, 4, 8, 2],
+            [4, 8, 2, null]
+        ],
+        "scoreDelta": 4,
+        "changed": true
+    }
+]
