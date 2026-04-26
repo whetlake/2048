@@ -1,6 +1,5 @@
 import type { Board, Direction, MoveResult, Cell } from './types'
-
-const BOARD_SIZE = 4
+import { BOARD_SIZE } from './constants'
 
 export function moveBoard(board: Board, direction: Direction): MoveResult {
     assertValidBoard(board)
