@@ -30,10 +30,12 @@ button {
   display: grid;
   place-items: center;
   width: min(100% - 40px, 900px);
+  padding: 24px 0px;
 }
 
 .game-shell {
-  width: 100%
+  width: 100%;
+  touch-action: none;
 }
 
 .game-header {
@@ -177,6 +179,7 @@ h1 {
 @media (max-width: 760px) {
   .app {
     place-items: start center;
+    padding: 32px 0 24px;
   }
 
   .game-header {

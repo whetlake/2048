@@ -9,6 +9,9 @@ const controls: Record<string, Direction> = {
   ArrowDown: 'down'
 }
 
+const minSwipeDistance = 30 // required for mobile drag direction
+let pointerStart: { x: number; y: number} | null = null
+
 function getAppRoot(): HTMLDivElement {
   const app = document.querySelector<HTMLDivElement>('#app')
   if (!app) { throw new Error('App root not found')}
@@ -30,10 +33,9 @@ function render(): void {
 
 function handleKeyDown(event: KeyboardEvent): void {
   const direction = controls[event.key]
-  if (!direction || state.status !== 'playing') return
+  if (!direction) return
   event.preventDefault()
-  state = playTurn(state, direction, Math.random)
-  render()
+  playDirection(direction)
 }
 
 function renderGame(state: GameState): string {
@@ -100,6 +102,10 @@ function bindEvents(): void {
     state = createInitialState(Math.random)
     render()
   })
+  const gameShell = app.querySelector<HTMLElement>('.game-shell')
+  gameShell?.addEventListener('pointerdown', handlePointerDown)
+  gameShell?.addEventListener('pointerup', handlePointerUp)
+  // TODO: REMOVE THE DEMO TO TEST WIN AND LOSE
   app.querySelector<HTMLButtonElement>('#pre-won')?.addEventListener('click', () => {
     state = createPreWonState()
     render()
@@ -115,6 +121,36 @@ function getStatusText(status: GameState['status']): string {
   if (status === 'lost') return 'Game over'
   return 'Playing'
 }
+
+function playDirection(direction: Direction): void {
+  if (state.status !== 'playing') return
+  state = playTurn(state, direction, Math.random)
+  render()
+}
+
+function handlePointerDown(event: PointerEvent): void {
+  pointerStart = {
+    x: event.clientX,
+    y: event.clientY
+  }
+}
+
+function handlePointerUp(event: PointerEvent): void {
+  if (!pointerStart) return
+  const deltaX = event.clientX - pointerStart.x
+  const deltaY = event.clientY - pointerStart.y
+  pointerStart = null
+  if (Math.max(Math.abs(deltaX), Math.abs(deltaY)) < minSwipeDistance) return
+  const direction: Direction =
+    Math.abs(deltaX) > Math.abs(deltaY)
+      ? deltaX > 0 ? 'right' : 'left'
+      : deltaY > 0 ? 'down' : 'up'
+  playDirection(direction)
+}
+
+/*
+Useful demo functions below to test different states like lost and won
+*/
 
 function createPreWonState(): GameState {
   return {
