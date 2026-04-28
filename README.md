@@ -128,6 +128,18 @@ Available local models can be checked with:
 ollama list
 ```
 
+When using the GitHub Pages version, Ollama must allow the Pages origin because the browser app is served from `https://whetlake.github.io` while Ollama runs on `http://localhost:11434`.
+
+On macOS, this can be set with:
+
+```bash
+launchctl setenv OLLAMA_ORIGINS "https://whetlake.github.io"
+```
+
+After changing this setting, fully quit and restart the Ollama app. Restarting only the `ollama serve` process may not be enough if the menu bar app is still running.
+
+For local development with `pnpm dev`, this is usually not needed because Ollama allows localhost origins by default.
+
 ## Technical choices
 
 TypeScript was used because it keeps installation and local running simple while still giving type safety for the board, moves, game state, and advisor logic. The browser-first approach keeps the project portable across operating systems and does not require a backend service, Docker, or a local Python runtime.
