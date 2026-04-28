@@ -1,6 +1,11 @@
 import { getEmptyPositions } from "./spawning"
 import type { Board, Cell } from "./types"
 
+export function getMaxTile(board: Board): number {
+    const tiles = board.flat().filter(isTile)
+    return tiles.length === 0 ? 0 : Math.max(...tiles)
+}
+
 export function isTile(cell: Cell): cell is number {
     return cell !== null
 }

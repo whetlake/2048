@@ -1,9 +1,9 @@
 import { moveBoard } from './movement'
 import { getEmptyPositions, spawnTile } from './spawning'
-import { getSearchDepth, isTile } from './helpers'
+import { getMaxTile, getSearchDepth } from './helpers'
 import { DIRECTIONS } from './types'
 import type { Board, Direction } from './types'
-import { EMPTY_CELL_WEIGHT, MAX_TILE_WEIGHT, VALID_MOVE_WEIGHT, SMOOTHNESS_WEIGHT } from './constants'
+import { EMPTY_CELL_WEIGHT, MAX_TILE_WEIGHT, VALID_MOVE_WEIGHT, SMOOTHNESS_WEIGHT, CORNER_MAX_TILE_WEIGHT } from './constants'
 
 export function getValidMoves(board: Board): Direction[] {
     return DIRECTIONS.filter((direction) => moveBoard(board, direction).changed)
@@ -14,19 +14,18 @@ export function scoreBoard(board: Board): number {
     const maxTile = getMaxTile(board)
     const validMoves = getValidMoves(board).length
     const smoothnessPenalty = getSmoothnessPenalty(board)
-    // Heuristic for expectimax states where we reward space, tile progression and flexibility of the moves
-    return emptyCells * EMPTY_CELL_WEIGHT + maxTile * MAX_TILE_WEIGHT + validMoves * VALID_MOVE_WEIGHT - smoothnessPenalty * SMOOTHNESS_WEIGHT
+    const cornerMaxTileBonus = hasMaxTileInCorner(board, maxTile) ? maxTile * CORNER_MAX_TILE_WEIGHT : 0
+    // Heuristic for expectimax states where we reward space, tile progression, flexibility of the moves
+    // largest tile being in corner and the smoothness of adjacent values (essentially preferring sorted array)
+    return emptyCells * EMPTY_CELL_WEIGHT + maxTile * MAX_TILE_WEIGHT + validMoves * VALID_MOVE_WEIGHT - smoothnessPenalty * SMOOTHNESS_WEIGHT + cornerMaxTileBonus
 }
 
-function getMaxTile(board: Board): number {
-    const tiles = board.flat().filter(isTile)
-    return tiles.length === 0 ? 0 : Math.max(...tiles)
-}
+
 
 export function scoreMove(board: Board, direction: Direction, depth: number = getSearchDepth(board)): number {
     const move = moveBoard(board, direction)
     if (!move.changed) return Number.NEGATIVE_INFINITY
-    return move.scoreDelta + scoreAfterRandomSpawn(move.board, depth -1)
+    return move.scoreDelta + scoreAfterRandomSpawn(move.board, depth - 1)
 }
 
 export function suggestMove(board: Board): Direction | null {
@@ -80,4 +79,13 @@ function getSmoothnessPenalty(board: Board): number {
         }
     }
     return penalty
+}
+
+function hasMaxTileInCorner(board: Board, maxTile: number): boolean {
+    const lastRowIndex = board.length - 1
+    const lastColumnIndex = board[0].length - 1
+    return board[0][0] === maxTile
+        || board[0][lastColumnIndex] === maxTile
+        || board[lastRowIndex][0] === maxTile
+        || board[lastRowIndex][lastColumnIndex] === maxTile
 }

@@ -1,6 +1,8 @@
 import readline from 'node:readline'
-import { stdin } from 'node:process'
+import { argv, stdin } from 'node:process'
 import { createInitialState, playTurn } from "./game/state"
+import { suggestMove } from './game/expectimax'
+import { getMaxTile } from './game/helpers'
 import type { Board, Direction, GameState } from "./game/types"
 
 const reset = '\x1b[0m' // ANSI escape codes keep the CLI dependency free
@@ -20,47 +22,78 @@ const controls: Record<string, Direction> = {
 const playingHelpText = 'Use arrow keys to move. Press u to undo, n for new game, or q/Esc/Ctrl+C/Ctrl+Z to quit.'
 const finishedHelpText = 'Press n for new game, or q/Esc/Ctrl+C/Ctrl+Z to quit.'
 
+const isAutoMode = argv.includes('--auto')
+const maxAutoTurns = 5000
+
 let state = createInitialState(Math.random)
 
 // Game states are immutable, so undo can keep previous states
 const history: GameState[] = []
-readline.emitKeypressEvents(stdin)
 
-// Raw mode lets the CLI react to arrow keys as individual key presses,
-// without having to press Enter
-if (stdin.isTTY) { stdin.setRawMode(true) }
+if (isAutoMode) {
+    runAutoGame()
+} else {
+    startInteractiveGame()
+}
 
-render()
+function startInteractiveGame(): void {
+    readline.emitKeypressEvents(stdin)
 
-stdin.on('keypress', (_, key) => {
-    if (key.name === 'q' || (key.ctrl && key.name === 'c') || key.name === 'escape' || (key.ctrl && key.name === 'z')) {
-        exit()
-        return
-    }
-    if (key.name === 'u') {
-        const previousState = history.pop()
-        if (previousState) {
-            state = previousState
-            render()
+    // Raw mode lets the CLI react to arrow keys as individual key presses,
+    // without having to press Enter
+    if (stdin.isTTY) { stdin.setRawMode(true) }
+
+    render()
+
+    stdin.on('keypress', (_, key) => {
+        if (key.name === 'q' || (key.ctrl && key.name === 'c') || key.name === 'escape' || (key.ctrl && key.name === 'z')) {
+            exit()
+            return
         }
-        return
-    }
-    if (key.name === 'n') {
-        state = createInitialState(Math.random)
-        history.length = 0
+        if (key.name === 'u') {
+            const previousState = history.pop()
+            if (previousState) {
+                state = previousState
+                render()
+            }
+            return
+        }
+        if (key.name === 'n') {
+            state = createInitialState(Math.random)
+            history.length = 0
+            render()
+            return
+        }
+        const direction = controls[key.name]
+        if (direction && state.status === 'playing') {
+            const nextState = playTurn(state, direction, Math.random)
+            if (nextState !== state) {
+                history.push(state)
+                state = nextState
+                render()
+            }
+        }
+    })
+}
+
+function runAutoGame(): void {
+    let turns = 0
+    while (state.status === 'playing' && turns < maxAutoTurns) {
+        const move = suggestMove(state.board)
+        if (move === null) break
+        state = playTurn(state, move, Math.random)
+        turns += 1
         render()
-        return
+        console.log(`Turns: ${turns}`)
+        console.log(`Max tile: ${getMaxTile(state.board)}`)
     }
-    const direction = controls[key.name]
-    if (direction && state.status === 'playing') {
-        const nextState = playTurn(state, direction, Math.random)
-        if (nextState !== state) {
-            history.push(state)
-            state = nextState
-            render()
-        }
+    render()
+    console.log(`Turns: ${turns}`)
+    console.log(`Max tile: ${getMaxTile(state.board)}`)
+    if (state.status === 'playing') {
+        console.log(`Stopped after ${maxAutoTurns} turns`)
     }
-})
+}
 
 function render(): void {
     console.clear()

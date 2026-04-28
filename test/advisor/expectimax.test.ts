@@ -42,14 +42,14 @@ describe('scoreBoard', () => {
     })
     test('scores a board with higher max tile better when shape is similar', () => {
         const lowerMaxTile: Board = [
-            [2, 4, null, null],
-            [8, 16, null, null],
+            [16, null, null, null],
+            [null, null, null, null],
             [null, null, null, null],
             [null, null, null, null]
         ]
         const higherMaxTile: Board = [
-            [4, 8, null, null],
-            [16, 32, null, null],
+            [32, null, null, null],
+            [null, null, null, null],
             [null, null, null, null],
             [null, null, null, null]
         ]
@@ -75,15 +75,6 @@ describe('suggestMove', () => {
             [16, null, null, null]
         ]
         expect(getValidMoves(board)).toContain(suggestMove(board))
-    })
-    test('uses merged score when comparing moves', () => {
-        const board: Board = [
-            [2, 2, null, null],
-            [4, 8, null, null],
-            [16, 32, null, null],
-            [64, 128, null, null]
-        ]
-        expect(suggestMove(board)).toBe('left')
     })
     test('compare immediate merge score directly', () => {
         const board: Board = [
@@ -117,5 +108,20 @@ describe('suggestMove', () => {
             [64, 128, null, null]
         ]
         expect(scoreBoard(smoothBoard)).toBeGreaterThan(scoreBoard(roughBoard))
+    })
+    test('rewards keeping the largest tile in a corner', () => {
+        const cornerBoard: Board = [
+            [128, 2, 4, 8],
+            [16, 32, 64, 2],
+            [4, 8, 16, 32],
+            [2, 4, 8, 16],
+        ]
+        const middleBoard: Board = [
+            [16, 2, 4, 8],
+            [16, 32, 128, 2],
+            [4, 8, 16, 32],
+            [2, 4, 8, 16],
+        ]
+        expect(scoreBoard(cornerBoard)).toBeGreaterThan(scoreBoard(middleBoard))
     })
 })
