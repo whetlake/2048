@@ -1,7 +1,8 @@
 import './style.css'
 import { createInitialState, playTurn } from './game/state'
 import type { Board, Cell, Direction, GameState } from './game/types'
-import { suggestMove } from './game/expectimax'
+import { getValidMoves, suggestMove } from './game/expectimax'
+import { requestOllamaMove } from './game/ollamaAdvisor'
 
 const controls: Record<string, Direction> = {
   ArrowLeft: 'left',
@@ -33,8 +34,11 @@ let suggestedMove: Direction | null = null
 let advisorAsked = false
 let advisorThinking = false
 let ollamaEndpoint = 'http://localhost:11434'
-let ollamaModel = 'deepseek-r1:14b'
+let ollamaModel = 'qwen2-math'
+let ollamaAsked = false
 let ollamaStatus = ''
+let ollamaThinking = false
+let ollamaSuggestedMove: Direction | null = null
 
 render()
 
@@ -122,9 +126,17 @@ function renderAdvisor(): string {
 }
 
 function renderOllamaAdvisor(): string {
+  const ollamaSuggestionText = ollamaThinking
+    ? 'Thinking...'
+    : !ollamaAsked
+      ? '?'
+      : ollamaSuggestedMove === null
+        ? '-'
+        : directionSymbols[ollamaSuggestedMove]
   return `
     <section class="llm-advisor">
       <h3>Ollama advisor</h3>
+      <p class="ollama-suggestion">Suggested move: <strong>${ollamaSuggestionText}</strong></p>
       <label class="llm-field">
         Endpoint
         <input id="ollama-endpoint" type="url" value="${escapeHtml(ollamaEndpoint)}">
@@ -133,7 +145,7 @@ function renderOllamaAdvisor(): string {
         Model
         <input id="ollama-model" type="text" value="${escapeHtml(ollamaModel)}">
       </label>
-      <button id="ask-ollama" class="advisor-button" type="button">Ask Ollama</button>
+      <button id="ask-ollama" class="advisor-button" type="button" ${ollamaThinking ? 'disabled' : ''}>Ask Ollama</button>
       <p class="llm-note">Uses a local Ollama server. No API key is required or stored.</p>
       ${ollamaStatus ? `<p class="llm-status">${escapeHtml(ollamaStatus)}</p>` : ''}
     </section>
@@ -144,9 +156,7 @@ function renderOllamaAdvisor(): string {
 function bindEvents(): void {
   app.querySelector<HTMLButtonElement>('#new-game')?.addEventListener('click', () => {
     state = createInitialState(Math.random)
-    suggestedMove = null
-    advisorAsked = false
-    advisorThinking = false
+    resetAdvisors()
     render()
   })
   const gameShell = app.querySelector<HTMLElement>('.game-shell')
@@ -168,23 +178,31 @@ function bindEvents(): void {
   endpointInput?.addEventListener('input', () => { ollamaEndpoint = endpointInput.value })
   const modelInput = app.querySelector<HTMLInputElement>('#ollama-model')
   modelInput?.addEventListener('input', () => { ollamaModel = modelInput.value })
-  app.querySelector<HTMLButtonElement>('#ask-ollama')?.addEventListener('click', () => {
-    ollamaStatus = 'Ollama connection comes next'
+  app.querySelector<HTMLButtonElement>('#ask-ollama')?.addEventListener('click', async () => {
+    ollamaAsked = true
+    ollamaThinking = true
+    ollamaStatus = ''
+    ollamaSuggestedMove = null
     render()
+    try {
+      const validMoves = getValidMoves(state.board)
+      ollamaSuggestedMove = await requestOllamaMove(ollamaEndpoint, ollamaModel, state.board, validMoves)
+    } catch {
+      ollamaStatus = 'Could not connect to Ollama'
+    } finally {
+      ollamaThinking = false
+      render()
+    }
   })
   // TODO: WE CAN REMOVE THE DEMO TO TEST WIN AND LOSE
   app.querySelector<HTMLButtonElement>('#pre-won')?.addEventListener('click', () => {
     state = createPreWonState()
-    suggestedMove = null
-    advisorAsked = false
-    advisorThinking = false
+    resetAdvisors()
     render()
   })
   app.querySelector<HTMLButtonElement>('#pre-lost')?.addEventListener('click', () => {
     state = createPreLostState()
-    suggestedMove = null
-    advisorAsked = false
-    advisorThinking = false
+    resetAdvisors()
     render()
   })
 }
@@ -198,9 +216,7 @@ function getStatusText(status: GameState['status']): string {
 function playDirection(direction: Direction): void {
   if (state.status !== 'playing') return
   state = playTurn(state, direction, Math.random)
-  suggestedMove = null
-  advisorAsked = false
-  advisorThinking = false
+  resetAdvisors()
   render()
 }
 
@@ -224,6 +240,10 @@ function handlePointerUp(event: PointerEvent): void {
   playDirection(direction)
 }
 
+/*
+Local helper functions
+*/
+
 // This is useful, because Safari struggled with painting the thinking
 function waitForPaint(): Promise<void> {
   return new Promise((resolve) => {
@@ -239,6 +259,16 @@ function escapeHtml(value: string): string {
     .replaceAll('"', '&quot;')
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
+}
+
+function resetAdvisors(): void {
+  suggestedMove = null
+  advisorAsked = false
+  advisorThinking = false
+  ollamaAsked = false
+  ollamaThinking = false
+  ollamaSuggestedMove = null
+  ollamaStatus = ''
 }
 
 /*
