@@ -73,11 +73,6 @@ h1 {
   border-color: var(--color-blue);
 }
 
-.status-won,
-.status-lost {
-  animation: status-pop 180ps ease-out;
-}
-
 .game-actions {
   display: flex;
   gap: 12px;
@@ -113,13 +108,6 @@ h1 {
   color: #FFFFFF;
   background: var(--color-blue);
   cursor: pointer;
-  transition:
-    transform 120ms ease,
-    background-color 120ms ease;
-}
-
-.new-game:active {
-  transform: translateY(1px) scale(0.98);
 }
 
 .game-layout {
@@ -159,7 +147,6 @@ h1 {
 .tile:not([data-value='empty']) {
   background: var(--color-yellow);
   border-color: var(--color-blue);
-  animation: tile-pop 120ms ease-out;
 }
 
 .tile-digits-3 {
@@ -204,23 +191,6 @@ h1 {
     grid-template-columns: 1fr;
   }
 }
-
-@keyframes tile-pop {
-  from {
-    transform: scale(0.92);
-  } to {
-    transform: scale(1);
-  }
-}
-
-@keyframes status-pop {
-  from {
-    transform: scale(0.96);
-  } to {
-    transform: scale(1);
-  }
-}
-
 
 .demo-actions {
   display: flex;
