@@ -55,9 +55,11 @@ h1 {
 .status {
   display: inline-block;
   margin: 8px 0 0;
-  padding: 4px 10px;
+  padding: 3px 8px;
   color: var(--color-pencil);
   border: 2px solid transparent;
+  font-size: 13px;
+  line-height: 1.1;
   text-transform: capitalize;
 }
 
@@ -174,6 +176,15 @@ h1 {
 .advisor p {
   margin-top: 8px;
   color: var(--color-pencil);
+}
+
+.advisor-button {
+  margin-top: 12px;
+  border: 2px solid var(--color-blue);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: var(--color-text);
+  cursor: pointer;
 }
 
 @media (max-width: 760px) {

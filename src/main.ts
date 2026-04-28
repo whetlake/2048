@@ -1,6 +1,7 @@
 import './style.css'
 import { createInitialState, playTurn } from './game/state'
 import type { Board, Cell, Direction, GameState } from './game/types'
+import { suggestMove } from './game/expectimax'
 
 const controls: Record<string, Direction> = {
   ArrowLeft: 'left',
@@ -21,6 +22,7 @@ function getAppRoot(): HTMLDivElement {
 const app = getAppRoot()
 
 let state: GameState = createInitialState(Math.random)
+let suggestedMove: Direction | null = null
 
 render()
 
@@ -85,9 +87,12 @@ function renderTile(cell: Cell): string {
 }
 
 function renderAdvisor(): string {
+  const suggestionText = suggestedMove === null ? 'No suggestion yet' : formatDirection(suggestedMove)
   return `
     <aside class="advisor">
       <h2>Advisor</h2>
+      <p class="advisor-suggestion">Suggested move: <strong>${suggestionText}</strong></p>
+      <button id="ask-advisor" class="advisor-button" type="button">Ask advisor</button>
       <p>Use arrow keys to move. Demo states available below.</p>
       <div class="demo-actions">
         <button id="pre-won" type="button">Pre-won</button>
@@ -100,18 +105,25 @@ function renderAdvisor(): string {
 function bindEvents(): void {
   app.querySelector<HTMLButtonElement>('#new-game')?.addEventListener('click', () => {
     state = createInitialState(Math.random)
+    suggestedMove = null
     render()
   })
   const gameShell = app.querySelector<HTMLElement>('.game-shell')
   gameShell?.addEventListener('pointerdown', handlePointerDown)
   gameShell?.addEventListener('pointerup', handlePointerUp)
-  // TODO: REMOVE THE DEMO TO TEST WIN AND LOSE
+  app.querySelector<HTMLButtonElement>('#ask-advisor')?.addEventListener('click', () => {
+    suggestedMove = suggestMove(state.board)
+    render()
+  })
+  // TODO: WE CAN REMOVE THE DEMO TO TEST WIN AND LOSE
   app.querySelector<HTMLButtonElement>('#pre-won')?.addEventListener('click', () => {
     state = createPreWonState()
+    suggestedMove = null
     render()
   })
   app.querySelector<HTMLButtonElement>('#pre-lost')?.addEventListener('click', () => {
     state = createPreLostState()
+    suggestedMove = null
     render()
   })
 }
@@ -125,6 +137,7 @@ function getStatusText(status: GameState['status']): string {
 function playDirection(direction: Direction): void {
   if (state.status !== 'playing') return
   state = playTurn(state, direction, Math.random)
+  suggestedMove = null
   render()
 }
 
@@ -146,6 +159,10 @@ function handlePointerUp(event: PointerEvent): void {
       ? deltaX > 0 ? 'right' : 'left'
       : deltaY > 0 ? 'down' : 'up'
   playDirection(direction)
+}
+
+function formatDirection(direction: Direction): string {
+  return direction.charAt(0).toUpperCase() + direction.slice(1)
 }
 
 /*

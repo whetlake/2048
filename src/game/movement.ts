@@ -1,4 +1,5 @@
 import type { Board, Direction, MoveResult, Cell } from './types'
+import { isTile } from './helpers'
 import { BOARD_SIZE } from './constants'
 
 export function moveBoard(board: Board, direction: Direction): MoveResult {
@@ -74,10 +75,6 @@ function transpose(board: Board): Board {
 /*
 Helper functions
 */
-
-function isTile(cell: Cell): cell is number {
-    return cell !== null
-}
 
 function boardsEqual(a: Board, b: Board): boolean {
     return a.every((row, rowIndex) =>
