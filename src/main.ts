@@ -159,9 +159,9 @@ function bindEvents(): void {
     resetAdvisors()
     render()
   })
-  const gameShell = app.querySelector<HTMLElement>('.game-shell')
-  gameShell?.addEventListener('pointerdown', handlePointerDown)
-  gameShell?.addEventListener('pointerup', handlePointerUp)
+  const board = app.querySelector<HTMLElement>('.board')
+  board?.addEventListener('pointerdown', handlePointerDown)
+  board?.addEventListener('pointerup', handlePointerUp)
   app.querySelector<HTMLButtonElement>('#ask-advisor')?.addEventListener('click', async () => {
     advisorAsked = true
     advisorThinking = true
