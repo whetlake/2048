@@ -222,3 +222,37 @@ h1 {
   background: var(--color-background);
   cursor: pointer;
 }
+
+.llm-advisor {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-line);
+}
+
+.llm-advisor h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.llm-field {
+  display: grid;
+  gap: 4px;
+  margin-top: 10px;
+  color: var(--color-pencil);
+  font-size: 12px;
+}
+
+.llm-field input {
+  width: 100%;
+  border: 2px solid var(--color-blue);
+  border-radius: 6px;
+  padding: 8px;
+  color: var(--color-blue);
+  background: var(--color-background);
+}
+
+.llm-note,
+.llm-status {
+  font-size: 12px;
+  line-height: 1.35;
+}

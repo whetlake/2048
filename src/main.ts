@@ -32,6 +32,9 @@ let state: GameState = createInitialState(Math.random)
 let suggestedMove: Direction | null = null
 let advisorAsked = false
 let advisorThinking = false
+let ollamaEndpoint = 'http://localhost:11434'
+let ollamaModel = 'deepseek-r1:14b'
+let ollamaStatus = ''
 
 render()
 
@@ -96,13 +99,20 @@ function renderTile(cell: Cell): string {
 }
 
 function renderAdvisor(): string {
-  const suggestionText = advisorThinking ? '<span class="advisor-thinking">Thinking...</span>' : !advisorAsked ? '?' : suggestedMove === null ? '-' : directionSymbols[suggestedMove]
+  const suggestionText = advisorThinking
+    ? '<span class="advisor-thinking">Thinking...</span>'
+    : !advisorAsked
+      ? '?'
+      : suggestedMove === null
+        ? '-'
+        : directionSymbols[suggestedMove]
   return `
     <aside class="advisor">
       <h2>Advisor</h2>
       <p class="advisor-suggestion">Suggested move: <strong>${suggestionText}</strong></p>
       <button id="ask-advisor" class="advisor-button" type="button" ${advisorThinking ? 'disabled' : ''}>Ask advisor</button>
       <p>Use arrow keys to move. Demo states available below.</p>
+      ${renderOllamaAdvisor()}
       <div class="demo-actions">
         <button id="pre-won" type="button">Pre-won</button>
         <button id="pre-lost" type="button">Pre-lost</button>
@@ -111,6 +121,26 @@ function renderAdvisor(): string {
   `
 }
 
+function renderOllamaAdvisor(): string {
+  return `
+    <section class="llm-advisor">
+      <h3>Ollama Advisor</h3>
+      <label class="llm-field">
+        Endpoint
+        <input id="ollama-endpoint" type="url" value="${escapeHtml(ollamaEndpoint)}">
+      </label>
+      <label class="llm-field">
+        Model
+        <input id="ollama-model" type="text" value="${escapeHtml(ollamaModel)}">
+      </label>
+      <button id="ask-ollama" class="advisor-button" type="button">Ask Ollama</button>
+      <p class="llm-note">Uses a local Ollama server. No API key is required or stored.</p>
+      ${ollamaStatus ? `<p class="llm-status">${escapeHtml(ollamaStatus)}</p>` : ''}
+    </section>
+  `
+}
+
+// Event handling including key events, swipe events, advisor events
 function bindEvents(): void {
   app.querySelector<HTMLButtonElement>('#new-game')?.addEventListener('click', () => {
     state = createInitialState(Math.random)
@@ -132,6 +162,14 @@ function bindEvents(): void {
     
     suggestedMove = suggestMove(state.board)
     advisorThinking = false
+    render()
+  })
+  const endpointInput = app.querySelector<HTMLInputElement>('#ollama-endpoint')
+  endpointInput?.addEventListener('input', () => { ollamaEndpoint = endpointInput.value })
+  const modelInput = app.querySelector<HTMLInputElement>('#ollama-model')
+  modelInput?.addEventListener('input', () => { ollamaModel = modelInput.value })
+  app.querySelector<HTMLButtonElement>('#ask-ollama')?.addEventListener('click', () => {
+    ollamaStatus = 'Ollama connection comes next'
     render()
   })
   // TODO: WE CAN REMOVE THE DEMO TO TEST WIN AND LOSE
@@ -186,12 +224,21 @@ function handlePointerUp(event: PointerEvent): void {
   playDirection(direction)
 }
 
+// This is useful, because Safari struggled with painting the thinking
 function waitForPaint(): Promise<void> {
   return new Promise((resolve) => {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => resolve())
     })
   })
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('"', '&quot;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
 }
 
 /*
