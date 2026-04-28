@@ -10,6 +10,13 @@ const controls: Record<string, Direction> = {
   ArrowDown: 'down'
 }
 
+const directionSymbols: Record<Direction, string> = {
+    left: '←',
+    right: '→',
+    up: '↑',
+    down: '↓'
+}
+
 const minSwipeDistance = 30 // required for mobile drag direction
 let pointerStart: { x: number; y: number} | null = null
 
@@ -23,6 +30,8 @@ const app = getAppRoot()
 
 let state: GameState = createInitialState(Math.random)
 let suggestedMove: Direction | null = null
+let advisorAsked = false
+let advisorThinking = false
 
 render()
 
@@ -87,12 +96,12 @@ function renderTile(cell: Cell): string {
 }
 
 function renderAdvisor(): string {
-  const suggestionText = suggestedMove === null ? 'No suggestion yet' : formatDirection(suggestedMove)
+  const suggestionText = advisorThinking ? '<span class="advisor-thinking">Thinking...</span>' : !advisorAsked ? '?' : suggestedMove === null ? '-' : directionSymbols[suggestedMove]
   return `
     <aside class="advisor">
       <h2>Advisor</h2>
       <p class="advisor-suggestion">Suggested move: <strong>${suggestionText}</strong></p>
-      <button id="ask-advisor" class="advisor-button" type="button">Ask advisor</button>
+      <button id="ask-advisor" class="advisor-button" type="button" ${advisorThinking ? 'disabled' : ''}>Ask advisor</button>
       <p>Use arrow keys to move. Demo states available below.</p>
       <div class="demo-actions">
         <button id="pre-won" type="button">Pre-won</button>
@@ -106,24 +115,38 @@ function bindEvents(): void {
   app.querySelector<HTMLButtonElement>('#new-game')?.addEventListener('click', () => {
     state = createInitialState(Math.random)
     suggestedMove = null
+    advisorAsked = false
+    advisorThinking = false
     render()
   })
   const gameShell = app.querySelector<HTMLElement>('.game-shell')
   gameShell?.addEventListener('pointerdown', handlePointerDown)
   gameShell?.addEventListener('pointerup', handlePointerUp)
-  app.querySelector<HTMLButtonElement>('#ask-advisor')?.addEventListener('click', () => {
+  app.querySelector<HTMLButtonElement>('#ask-advisor')?.addEventListener('click', async () => {
+    advisorAsked = true
+    advisorThinking = true
+    suggestedMove = null
+    render()
+
+    await waitForPaint()
+    
     suggestedMove = suggestMove(state.board)
+    advisorThinking = false
     render()
   })
   // TODO: WE CAN REMOVE THE DEMO TO TEST WIN AND LOSE
   app.querySelector<HTMLButtonElement>('#pre-won')?.addEventListener('click', () => {
     state = createPreWonState()
     suggestedMove = null
+    advisorAsked = false
+    advisorThinking = false
     render()
   })
   app.querySelector<HTMLButtonElement>('#pre-lost')?.addEventListener('click', () => {
     state = createPreLostState()
     suggestedMove = null
+    advisorAsked = false
+    advisorThinking = false
     render()
   })
 }
@@ -138,6 +161,8 @@ function playDirection(direction: Direction): void {
   if (state.status !== 'playing') return
   state = playTurn(state, direction, Math.random)
   suggestedMove = null
+  advisorAsked = false
+  advisorThinking = false
   render()
 }
 
@@ -161,8 +186,12 @@ function handlePointerUp(event: PointerEvent): void {
   playDirection(direction)
 }
 
-function formatDirection(direction: Direction): string {
-  return direction.charAt(0).toUpperCase() + direction.slice(1)
+function waitForPaint(): Promise<void> {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => resolve())
+    })
+  })
 }
 
 /*
