@@ -124,7 +124,7 @@ function renderAdvisor(): string {
 function renderOllamaAdvisor(): string {
   return `
     <section class="llm-advisor">
-      <h3>Ollama Advisor</h3>
+      <h3>Ollama advisor</h3>
       <label class="llm-field">
         Endpoint
         <input id="ollama-endpoint" type="url" value="${escapeHtml(ollamaEndpoint)}">
