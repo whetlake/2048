@@ -115,12 +115,8 @@ function renderAdvisor(): string {
       <h2>Advisor</h2>
       <p class="advisor-suggestion">Suggested move: <strong>${suggestionText}</strong></p>
       <button id="ask-advisor" class="advisor-button" type="button" ${advisorThinking ? 'disabled' : ''}>Ask advisor</button>
-      <p>Use arrow keys to move. Demo states available below.</p>
+      <p>Use arrow keys to move.</p>
       ${renderOllamaAdvisor()}
-      <div class="demo-actions">
-        <button id="pre-won" type="button">Pre-won</button>
-        <button id="pre-lost" type="button">Pre-lost</button>
-      </div>
     </aside>
   `
 }
@@ -194,17 +190,6 @@ function bindEvents(): void {
       render()
     }
   })
-  // TODO: WE CAN REMOVE THE DEMO TO TEST WIN AND LOSE
-  app.querySelector<HTMLButtonElement>('#pre-won')?.addEventListener('click', () => {
-    state = createPreWonState()
-    resetAdvisors()
-    render()
-  })
-  app.querySelector<HTMLButtonElement>('#pre-lost')?.addEventListener('click', () => {
-    state = createPreLostState()
-    resetAdvisors()
-    render()
-  })
 }
 
 function getStatusText(status: GameState['status']): string {
@@ -269,34 +254,4 @@ function resetAdvisors(): void {
   ollamaThinking = false
   ollamaSuggestedMove = null
   ollamaStatus = ''
-}
-
-/*
-Useful demo functions below to test different states like lost and won
-*/
-
-function createPreWonState(): GameState {
-  return {
-    board: [
-      [1024, 1024, null, null],
-      [2, 4, 8, 16],
-      [32, 64, 128, 256],
-      [512, 2, 4, 8],
-    ],
-    score: 0,
-    status: 'playing',
-  }
-}
-
-function createPreLostState(): GameState {
-  return {
-    board: [
-      [2, 4, 2, 4],
-      [4, 2, 4, 2],
-      [2, 4, 2, 4],
-      [4, null, 2, 4],
-    ],
-    score: 0,
-    status: 'playing',
-  }
 }

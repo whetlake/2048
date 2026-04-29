@@ -46,6 +46,16 @@ On mobile, swipe on the board to move tiles.
 
 The goal is to create a `2048` tile. The game ends when `2048` is reached or when no valid moves remain.
 
+## Game rules
+
+- The board is 4 x 4
+- The initial board starts with 2 to 4 random `2` tiles
+- A new tile appears only after a valid move
+- A tile can merge only once per move
+- New tiles are `2` 90% of the time and `4` 10% of the time
+- The game is won when `2048` appears
+- The game is lost when no valid moves remain
+
 ## Tests
 
 Run the test suite:
